@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAK DESIGN SOLUTIONS | Architecture & Digital</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;700&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    
+    <style>
+        :root {
+            --bg: #0a1f1d; --accent: #5ce1bd; --text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.08);
+        }
+        [data-theme="light"] {
+            --bg: #f4f7f6; --accent: #0a1f1d; --text: #0a1f1d;
+            --glass: rgba(0, 0, 0, 0.02); --border: rgba(0, 0, 0, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.6; transition: background 0.8s cubic-bezier(0.7, 0, 0.3, 1); }
+
+        /* --- Elite UI Components --- */
+        #cursor { position: fixed; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 10000; mix-blend-mode: difference; }
+        #cursor-f { position: fixed; width: 40px; height: 40px; border: 1px solid var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; }
+        
+        .loader { position: fixed; inset: 0; background: #000; z-index: 20000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .loader-text { font-family: 'Syncopate'; font-size: 0.7rem; letter-spacing: 10px; color: #fff; margin-bottom: 20px; }
+        .loader-bar { width: 100px; height: 1px; background: rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+        .loader-fill { position: absolute; left: 0; width: 0%; height: 100%; background: var(--accent); }
+
+        .live-clock { position: fixed; bottom: 30px; left: 30px; z-index: 1000; font-family: 'Syncopate'; font-size: 0.6rem; letter-spacing: 2px; opacity: 0.4; }
+        .theme-toggle { position: fixed; top: 30px; right: 30px; width: 50px; height: 26px; background: var(--glass); border: 1px solid var(--border); border-radius: 20px; z-index: 1000; display: flex; align-items: center; padding: 4px; }
+        .toggle-dot { width: 18px; height: 18px; background: var(--accent); border-radius: 50%; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        [data-theme="light"] .toggle-dot { transform: translateX(24px); }
+
+        /* --- Hero --- */
+        .hero { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .nebula { position: absolute; inset: -15%; background: radial-gradient(circle at 30% 30%, rgba(92, 225, 189, 0.12), transparent), radial-gradient(circle at 70% 70%, rgba(0, 255, 255, 0.06), transparent); filter: blur(100px); pointer-events: none; }
+        h1 { font-family: 'Syncopate'; font-size: clamp(2.5rem, 9vw, 7rem); line-height: 0.85; text-align: center; z-index: 10; letter-spacing: -2px; }
+        h1 span { display: block; opacity: 0; transform: translateY(60px) rotate(2deg); }
+
+        /* --- Capabilities Grid --- */
+        .section { padding: 140px 10%; max-width: 1600px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-top: 60px; }
+        .image-card { position: relative; height: 550px; overflow: hidden; background: #000; border-radius: 2px; }
+        .image-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: transform 1.5s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.8s ease; }
+        .card-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%); display: flex; align-items: flex-end; padding: 40px; z-index: 2; }
+        .image-card:hover img { transform: scale(1.1); opacity: 1; }
+        .card-content h3 { font-family: 'Syncopate'; font-size: 1rem; letter-spacing: 3px; color: #fff; }
+
+        /* --- Back to Top --- */
+        .progress-wrap { position: fixed; right: 30px; bottom: 30px; height: 46px; width: 46px; cursor: pointer; display: block; border-radius: 50px; box-shadow: inset 0 0 0 2px var(--border); z-index: 10000; opacity: 0; visibility: hidden; transform: translateY(15px); transition: all 200ms linear; }
+        .progress-wrap.active-progress { opacity: 1; visibility: visible; transform: translateY(0); }
+        .progress-wrap svg.progress-circle path { fill: none; stroke: var(--accent); stroke-width: 4; box-sizing: border-box; transition: all 200ms linear; }
+
+        /* --- Lightbox --- */
+        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 30000; display: none; align-items: center; justify-content: center; padding: 50px; }
+        #lightbox img { max-width: 100%; max-height: 90vh; border: 1px solid var(--border); }
+
+        @media (max-width: 768px) { #cursor, #cursor-f, .live-clock { display: none; } * { cursor: auto !important; } .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="loader">
+        <div class="loader-text">MAK STUDIO</div>
+        <div class="loader-bar"><div class="loader-fill"></div></div>
+    </div>
+
+    <div id="cursor"></div>
+    <div id="cursor-f"></div>
+    <div class="live-clock" id="clock">00:00:00 GMT</div>
+    
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <div class="toggle-dot"></div>
+    </div>
+
+    <div class="progress-wrap" id="scrollTop">
+        <svg class="progress-circle" width="100%" height="100%" viewBox="-1 -1 102 102">
+            <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"/>
+        </svg>
+    </div>
+
+    <section class="hero">
+        <div class="nebula"></div>
+        <h1 id="hero-title">
+            <span>MAK DESIGN</span>
+            <span style="color:var(--accent); font-weight: 300;">SOLUTIONS.</span>
+        </h1>
+    </section>
+
+    <section class="section">
+        <p style="font-family:'Syncopate'; font-size: 0.6rem; letter-spacing: 5px; opacity: 0.4;">EST. 2026 / CAPABILITIES</p>
+        <div class="grid">
+            <div class="image-card" onclick="openLightbox(this)">
+                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200" alt="Architecture">
+                <div class="card-overlay"><div class="card-content"><p style="color:var(--accent); font-size: 0.7rem; margin-bottom: 5px;">01</p><h3>ARCHITECTURE</h3></div></div>
+            </div>
+            <div class="image-card" onclick="openLightbox(this)">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200" alt="Visualization">
+                <div class="card-overlay"><div class="card-content"><p style="color:var(--accent); font-size: 0.7rem; margin-bottom: 5px;">02</p><h3>VISUALIZATION</h3></div></div>
+            </div>
+            <div class="image-card" onclick="openLightbox(this)">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1200" alt="Digital Art">
+                <div class="card-overlay"><div class="card-content"><p style="color:var(--accent); font-size: 0.7rem; margin-bottom: 5px;">03</p><h3>DIGITAL ART</h3></div></div>
+            </div>
+        </div>
+    </section>
+><section class="section" id="apply">
+    <div style="text-align: center; margin-bottom: 60px;">
+        <p style="font-family:'Syncopate'; font-size: 0.6rem; letter-spacing: 5px; color: var(--accent);">CAREERS</p>
+        <h2 style="font-family:'Syncopate'; font-size: 2.5rem; margin-top: 10px;">JOIN THE COLLECTIVE</h2>
+    </div>
+
+    <form action="https://formspree.io/f/your-id-here" method="POST" enctype="multipart/form-data" class="app-form">
+        <div class="form-grid">
+            <div class="input-wrap">
+                <label>FULL NAME</label>
+                <input type="text" name="name" placeholder="John Doe" required>
+            </div>
+            <div class="input-wrap">
+                <label>EMAIL ADDRESS</label>
+                <input type="email" name="email" placeholder="john@example.com" required>
+            </div>
+            
+            <div class="input-wrap" style="grid-column: span 2;">
+                <label>UPLOAD RESUME / PORTFOLIO (PDF/ZIP)</label>
+                <div class="file-upload-box">
+                    <input type="file" name="upload" id="file-input" class="hidden-file">
+                    <label for="file-input" class="file-label">
+                        <span id="file-name">CHOOSE FILE OR DRAG HERE</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="input-wrap" style="grid-column: span 2;">
+                <label>WHY MAK DESIGN SOLUTIONS?</label>
+                <textarea name="message" placeholder="Briefly describe your vision..."></textarea>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button type="submit" class="mag-btn">SEND APPLICATION</button>
+        </div>
+    </form>
+</section>
+
+<style>
+    /* File Upload Styling */
+    .file-upload-box {
+        position: relative;
+        width: 100%;
+        border: 1px dashed var(--border);
+        background: rgba(255,255,255,0.02);
+        padding: 20px;
+        text-align: center;
+        transition: 0.3s;
+    }
+    .file-upload-box:hover {
+        border-color: var(--accent);
+        background: rgba(92, 225, 189, 0.05);
+    }
+    .hidden-file {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .file-label {
+        font-family: 'Inter';
+        font-size: 0.8rem;
+        opacity: 0.5;
+        letter-spacing: 1px;
+    }
+    /* Style for the button already in your master file */
+    .mag-btn {
+        background: var(--accent);
+        color: #000;
+        padding: 20px 60px;
+        font-family: 'Syncopate';
+        font-size: 0.7rem;
+        border: none;
+        letter-spacing: 2px;
+        transition: 0.4s;
+    }
+</style>
+
+<script>
+    // Update filename text when a file is selected
+    const fileInput = document.getElementById('file-input');
+    const fileNameSpan = document.getElementById('file-name');
+
+    fileInput.addEventListener('change', (e) => {
+        const name = e.target.files[0] ? e.target.files[0].name : "CHOOSE FILE OR DRAG HERE";
+        fileNameSpan.innerText = name.toUpperCase();
+        fileNameSpan.style.color = "var(--accent)";
+        fileNameSpan.style.opacity = "1";
+    });
+</script>
+
+    <div id="lightbox" onclick="this.style.display='none'">
+        <img id="lightbox-img" src="">
+    </div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+        // 1. Clock & Theme
+        function updateClock() { document.getElementById('clock').innerText = new Date().toTimeString().split(' ')[0] + " GMT"; }
+        setInterval(updateClock, 1000); updateClock();
+
+        function toggleTheme() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
+        }
+
+        // 2. Magnetic Cursor & Nebula
+        const cursor = document.querySelector('#cursor');
+        const follower = document.querySelector('#cursor-f');
+        window.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0 });
+            gsap.to(follower, { x: e.clientX, y: e.clientY, duration: 0.15 });
+            gsap.to(".nebula", { x: (e.clientX - window.innerWidth/2) * 0.05, y: (e.clientY - window.innerHeight/2) * 0.05, duration: 2 });
+        });
+
+        // 3. Loader & Entrance
+        window.onload = () => {
+            gsap.to(".loader-fill", { width: "100%", duration: 2.5, ease: "power4.inOut", onComplete: () => {
+                gsap.to(".loader", { yPercent: -100, duration: 1.2, ease: "expo.inOut" });
+                gsap.to("#hero-title span", { opacity: 1, y: 0, rotate: 0, stagger: 0.3, duration: 1.5, ease: "expo.out", delay: 0.5 });
+            }});
+        };
+
+        // 4. Scroll Progress Circle
+        const progressPath = document.querySelector('.progress-circle path');
+        const pathLength = progressPath.getTotalLength();
+        progressPath.style.strokeDasharray = `${pathLength} ${pathLength}`;
+        progressPath.style.strokeDashoffset = pathLength;
+
+        window.addEventListener('scroll', () => {
+            const scroll = window.pageYOffset;
+            const height = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = pathLength - (scroll * pathLength / height);
+            progressPath.style.strokeDashoffset = progress;
+            
+            if (scroll > 50) document.getElementById('scrollTop').classList.add('active-progress');
+            else document.getElementById('scrollTop').classList.remove('active-progress');
+        });
+
+        document.getElementById('scrollTop').onclick = () => gsap.to(window, { scrollTo: 0, duration: 2, ease: "expo.inOut" });
+
+        // 5. Lightbox
+        function openLightbox(el) {
+            const src = el.querySelector('img').src;
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+
+        // 6. Interaction Effects
+        document.querySelectorAll('.image-card, button, .theme-toggle').forEach(el => {
+            el.addEventListener('mouseenter', () => gsap.to(follower, { scale: 1.8, backgroundColor: "rgba(92, 225, 189, 0.1)", border: "none" }));
+            el.addEventListener('mouseleave', () => gsap.to(follower, { scale: 1, backgroundColor: "transparent", border: "1px solid var(--accent)" }));
+        });
+    </script><section class="section" id="apply">
+    <div style="text-align: center; margin-bottom: 60px;">
+        <p style="font-family:'Syncopate'; font-size: 0.6rem; letter-spacing: 5px; color: var(--accent);">JOIN THE STUDIO</p>
+        <h2 style="font-family:'Syncopate'; font-size: 2.5rem; margin-top: 10px;">SUBMIT APPLICATION</h2>
+    </div>
+
+    <form action="https://formspree.io/f/your-unique-id" method="POST" class="app-form">
+        <div class="form-grid">
+            <div class="input-wrap">
+                <label>FULL NAME</label>
+                <input type="text" name="name" placeholder="John Doe" required>
+            </div>
+            <div class="input-wrap">
+                <label>EMAIL ADDRESS</label>
+                <input type="email" name="_replyto" placeholder="john@example.com" required>
+            </div>
+            <div class="input-wrap" style="grid-column: span 2;">
+                <label>PORTFOLIO LINK / LINKEDIN</label>
+                <input type="url" name="portfolio" placeholder="https://..." required>
+            </div>
+            <div class="input-wrap" style="grid-column: span 2;">
+                <label>TELL US ABOUT YOURSELF</label>
+                <textarea name="message" placeholder="Why MAK Design Solutions?"></textarea>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button type="submit" class="mag-btn">SUBMIT TO STUDIO</button>
+        </div>
+    </form>
+</section>
+
+<style>
+    .app-form { max-width: 800px; margin: 0 auto; background: var(--glass); padding: 50px; border: 1px solid var(--border); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .input-wrap label { display: block; font-family: 'Syncopate'; font-size: 0.6rem; letter-spacing: 2px; margin-bottom: 10px; opacity: 0.6; }
+    .input-wrap input, .input-wrap textarea {
+        width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+        padding: 15px; color: #fff; font-family: 'Inter'; outline: none; transition: 0.3s;
+    }
+    .input-wrap input:focus { border-color: var(--accent); background: rgba(92, 225, 189, 0.05); }
+    .mag-btn { background: var(--accent); color: #000; padding: 20px 60px; font-family: 'Syncopate'; font-size: 0.8rem; border: none; cursor: none; transition: 0.3s; }
+    .mag-btn:hover { background: #fff; transform: translateY(-5px); }
+    
+    @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .input-wrap { grid-column: span 1 !important; } }
+</style>
+</body>
+</html>
